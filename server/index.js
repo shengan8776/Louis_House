@@ -11,7 +11,7 @@ const groq_url_chat = 'https://api.groq.com/openai/v1/chat/completions';
 const apiKey = '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';
 
 app.use(cors({
-  origin: 'http://localhost:3002',
+  origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
