@@ -101,52 +101,10 @@ function parseLocationString(locationString) {
   return result;
 }
 
-// function parseLocationsString(locationsString) {
-//   // Remove the curly braces from the beginning and end
-//   const strippedString = locationsString.slice(1, -1).trim();
-  
-//   // Split by semicolons to get individual location entries
-//   const locationEntries = strippedString.split(';').filter(entry => entry.trim() !== '');
-  
-//   // Make sure we have at least 2 locations (origin and destination)
-//   if (locationEntries.length < 2) {
-//     throw new Error('At least two locations are required (origin and destination)');
-//   }
-  
-//   // Parse each location entry into a structured format
-//   const locations = locationEntries.map(entry => {
-//     const [name, address] = entry.trim().split('@');
-//     return {
-//       name: name.trim(),
-//       location: address.trim()
-//     };
-//   });
-  
-//   // Extract origin (first location)
-//   const origin = locations[0].location;
-  
-//   // Extract destination (last location)
-//   const destination = locations[locations.length - 1].location;
-  
-//   // Extract waypoints (everything in between)
-//   const waypoints = locations.slice(1, -1).map(loc => ({
-//     location: loc.location,
-//     stopover: true
-//   }));
-  
-//   // Construct and return the final object
-//   return {
-//     origin,
-//     destination,
-//     waypoints,
-//     // travelMode: window.google.maps.TravelMode.DRIVING
-//   };
-// }
 
 app.post('/chat', async (req, res) => {
   try {
     const user_prompt = req.body.prompt;
-    //console.log('user_prompt is ', user_prompt)
 
     // The request body you want to send
     const requestBody = {
@@ -189,7 +147,6 @@ app.post('/chat', async (req, res) => {
 app.post('/locations', async (req, res) => {
   try {
     const user_prompt = req.body.prompt;
-    //console.log('user_prompt is ', user_prompt)
 
     // The request body you want to send
     const requestBody = {
@@ -218,7 +175,7 @@ app.post('/locations', async (req, res) => {
     );
     
     // Send the API response back to the client
-    res.json(response.data.choices[0].message.content);
+    res.json(parseLocationString(response.data.choices[0].message.content));
 
   } catch (error) {
     console.error('API call failed:', error.message);
