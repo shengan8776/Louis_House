@@ -54,7 +54,7 @@ function Map() {
         mapRef.current.mapInstance = map;
         setMapInitialized(true);
       } catch (error) {
-        console.error("地图初始化错误:", error);
+        console.error("Map initialization error:", error);
       }
     }
   }, [mapLoaded, mapInitialized]);
