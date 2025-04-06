@@ -10,6 +10,7 @@ const groq_url_chat = 'https://api.groq.com/openai/v1/chat/completions';
 const apiKey = process.env.GROQ_API_KEY;
 const port = process.env.SERVER_PORT;
 const client_port = process.env.CLIENT_PORT;
+const system_prompt = "You are a road travel planer. Users will prompt you with destination that they want to go to, you need to plan a route and provide sites worth going to. Please give your response in the following format: {Applebees@Corvallis,OR; Mo seafood@Newport,OR; Gold beach@Gold Beach,OR; etc..} Do not give any sentence response.";
 
 app.use(cors({
   origin: 'http://localhost:' + client_port,
@@ -30,7 +31,7 @@ app.listen(port, () => {
 const authRoute = require('./routes/auth');
 app.use('/api/auth', authRoute);
 
-const prompt_content = "I want to have some icecream!"
+const prompt_content = "I am going back to San Jose,CA from Los Angeles,CA. And I would like to enjoy some ocean scenery."
 
 app.get('/generate-response', async (req, res) => {
   try {
@@ -40,7 +41,7 @@ app.get('/generate-response', async (req, res) => {
       "messages": [
         {
           "role": "system",
-          "content": "You are a warm Dad."
+          "content": system_prompt
         },
         {
           "role": "user",
@@ -61,7 +62,7 @@ app.get('/generate-response', async (req, res) => {
     );
     
     // Send the API response back to the client
-    res.json(response.data);
+    res.json(parseLocationString(response.data.choices[0].message.content));
     //console.log("response.choices[0] is ", response.data.choices[0].message.content)
   } catch (error) {
     console.error('API call failed:', error.message);
@@ -71,6 +72,76 @@ app.get('/generate-response', async (req, res) => {
     });
   }
 });
+
+function parseLocationString(locationString) {
+  // Remove the curly braces and split by semicolon
+  const cleanedString = locationString.replace(/[{}]/g, '').trim();
+  const locationArray = cleanedString.split(';').filter(location => location.trim() !== '');
+  
+  // Check if we have at least two locations (origin and destination)
+  if (locationArray.length < 2) {
+    throw new Error('At least two locations (origin and destination) are required');
+  }
+  
+  // Create the JSON structure
+  const result = {
+    origin: locationArray[0].trim(),
+    destination: locationArray[locationArray.length - 1].trim(),
+    waypoints: []
+  };
+  
+  // Add waypoints (everything between origin and destination)
+  for (let i = 1; i < locationArray.length - 1; i++) {
+    result.waypoints.push({
+      location: locationArray[i].trim(),
+      stopover: true
+    });
+  }
+  
+  return result;
+}
+
+// function parseLocationsString(locationsString) {
+//   // Remove the curly braces from the beginning and end
+//   const strippedString = locationsString.slice(1, -1).trim();
+  
+//   // Split by semicolons to get individual location entries
+//   const locationEntries = strippedString.split(';').filter(entry => entry.trim() !== '');
+  
+//   // Make sure we have at least 2 locations (origin and destination)
+//   if (locationEntries.length < 2) {
+//     throw new Error('At least two locations are required (origin and destination)');
+//   }
+  
+//   // Parse each location entry into a structured format
+//   const locations = locationEntries.map(entry => {
+//     const [name, address] = entry.trim().split('@');
+//     return {
+//       name: name.trim(),
+//       location: address.trim()
+//     };
+//   });
+  
+//   // Extract origin (first location)
+//   const origin = locations[0].location;
+  
+//   // Extract destination (last location)
+//   const destination = locations[locations.length - 1].location;
+  
+//   // Extract waypoints (everything in between)
+//   const waypoints = locations.slice(1, -1).map(loc => ({
+//     location: loc.location,
+//     stopover: true
+//   }));
+  
+//   // Construct and return the final object
+//   return {
+//     origin,
+//     destination,
+//     waypoints,
+//     // travelMode: window.google.maps.TravelMode.DRIVING
+//   };
+// }
 
 app.post('/chat', async (req, res) => {
   try {
@@ -83,7 +154,50 @@ app.post('/chat', async (req, res) => {
       "messages": [
         {
           "role": "system",
-          "content": "You are a warm Dad."
+          "content": system_prompt
+        },
+        {
+          "role": "user",
+          "content": user_prompt
+        }]
+    };
+    
+    // Make the API call with authorization header
+    const response = await axios.post(
+      groq_url_chat,
+      requestBody,
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    // Send the API response back to the client
+    res.json(response.data.choices[0].message.content);
+
+  } catch (error) {
+    console.error('API call failed:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch data from the API',
+      details: error.response ? error.response.data : error.message
+    });
+  }
+});
+
+app.post('/locations', async (req, res) => {
+  try {
+    const user_prompt = req.body.prompt;
+    //console.log('user_prompt is ', user_prompt)
+
+    // The request body you want to send
+    const requestBody = {
+      "model": "llama-3.3-70b-versatile",
+      "messages": [
+        {
+          "role": "system",
+          "content": system_prompt
         },
         {
           "role": "user",
