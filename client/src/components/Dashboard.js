@@ -4,11 +4,15 @@ import ChatInterface from './ChatInterface';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import PlaceCard from './PlaceCard';
+import { fetchAllPlaceDetailsFromRawString } from '../utils/googlePlaceHelper'; // 根據你的檔案位置調整
+
 
 function Dashboard() {
   const [dividerPosition1, setDividerPosition1] = useState(25);
   const [dividerPosition2, setDividerPosition2] = useState(65); 
   const [rawLocations, setRawLocations] = useState('');
+  const [locations, setLocations] = useState([]);
+  const mapInstance = useRef(null);
   const divider1Ref = useRef(null);
   const divider2Ref = useRef(null);
   const dashboardRef = useRef(null);
@@ -74,6 +78,27 @@ function Dashboard() {
     navigate('/login');
   };
 
+  const handleLocationsExtracted = async (locationStr) => {
+    console.log('📥 收到 Groq 回傳：', locationStr);
+  
+    // ✅ 先儲存原始字串，給地圖畫線用
+    setRawLocations(locationStr);
+  
+    // ✅ 再查詢詳細地點資訊
+    if (!mapInstance.current) {
+      console.error("❌ 地圖尚未準備好");
+      return;
+    }
+  
+    try {
+      const details = await fetchAllPlaceDetailsFromRawString(locationStr, mapInstance.current);
+      console.log('✅ 查詢結果：', details);
+      setLocations(details); // 顯示卡片用
+    } catch (err) {
+      console.error('❌ 查詢失敗：', err);
+    }
+  };  
+
   return (
     <div className="dashboard-container" ref={dashboardRef}>
       <div className="dashboard-header">
@@ -93,7 +118,7 @@ function Dashboard() {
             width: `${dividerPosition1}%` 
           }}
         >
-          <Map locationString={rawLocations} />
+          <Map locationString={rawLocations} mapInstance={mapInstance} />
         </div>
         
         {/* 第一个分隔线 */}
@@ -157,7 +182,7 @@ function Dashboard() {
             left: `${dividerPosition2 + 1}%` 
           }}
         >
-          <ChatInterface onLocationsExtracted={setRawLocations} />
+          <ChatInterface onLocationsExtracted={handleLocationsExtracted} />
         </div>
       </div>
     </div>
