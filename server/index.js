@@ -13,7 +13,8 @@ const apiKey = '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';
 app.use(cors({
   origin: 'http://localhost:3002',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.get('/', (req, res) => {
