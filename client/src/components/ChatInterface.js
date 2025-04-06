@@ -50,7 +50,12 @@ function ChatInterface({ onLocationsExtracted }) {
           withCredentials: true
         });
   
-        const replyText = response.data;
+        let replyText;
+        if (response.data === "no plan") {
+          replyText = "Please provide your origin and destination.";
+        } else {
+          replyText = response.data;
+        }
         
         const aiMessage = {
           id: Date.now() + 1,
@@ -73,7 +78,7 @@ function ChatInterface({ onLocationsExtracted }) {
   
         const errorMessage = {
           id: Date.now() + 1,
-          text: "抱歉，發送訊息時出現錯誤，請稍後再試。",
+          text: "Sorry, internet error.",
           sender: 'ai',
           timestamp: new Date().toISOString(),
         };
