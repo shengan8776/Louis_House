@@ -14,7 +14,8 @@ const client_port = process.env.CLIENT_PORT;
 app.use(cors({
   origin: 'http://localhost:' + client_port,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.get('/', (req, res) => {
