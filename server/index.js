@@ -10,7 +10,7 @@ const groq_url_chat = 'https://api.groq.com/openai/v1/chat/completions';
 const apiKey = process.env.GROQ_API_KEY;
 const port = process.env.SERVER_PORT;
 const client_port = process.env.CLIENT_PORT;
-const system_prompt = "You are a road travel planer. Users will prompt you with destination that they want to go to, you need to plan a route and provide sites worth going to. Please give your response in the following format: {Applebees@Corvallis,OR; Mo seafood@Newport,OR; Gold beach@Gold Beach,OR; etc..} Do not give any sentence response.";
+const system_prompt = "You are a road travel planer. Users will prompt you with destination that they want to go to, you need to plan a route and provide sites worth going to. Please give your response in the following format: {Applebees@Corvallis,OR; Mo seafood@Newport,OR; Gold beach@Gold Beach,OR; etc..} Do not give any sentence response. If the prompt does not content two locations, give a 'no plan' response.";
 
 app.use(cors({
   origin: 'http://localhost:' + client_port,
