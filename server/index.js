@@ -1,17 +1,18 @@
 const express = require('express')
 const axios = require('axios')
-//const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors');
-const port = 3001
 
+require('dotenv').config({ path: '../.env' });
 app.use(express.json());
 
 const groq_url_chat = 'https://api.groq.com/openai/v1/chat/completions';
-const apiKey = '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';
+const apiKey = process.env.GROQ_API_KEY;
+const port = process.env.SERVER_PORT;
+const client_port = process.env.CLIENT_PORT;
 
 app.use(cors({
-  origin: 'http://localhost:3002',
+  origin: 'http://localhost:' + client_port,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -60,7 +61,7 @@ app.get('/generate-response', async (req, res) => {
     
     // Send the API response back to the client
     res.json(response.data);
-    console.log("response.choices[0] is ", response.data.choices[0].message.content)
+    //console.log("response.choices[0] is ", response.data.choices[0].message.content)
   } catch (error) {
     console.error('API call failed:', error.message);
     res.status(500).json({ 
