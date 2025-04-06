@@ -13,8 +13,8 @@ const Map = ({ locationString }) => {
         if (!mapRef.current) return;
 
         mapInstance.current = new window.google.maps.Map(mapRef.current, {
-          center: { lat: 45.5122, lng: -122.6587 },
-          zoom: 10,
+          center: { lat: 44.5645, lng: -123.2757050 },
+          zoom: 12,
         });
 
         directionsRendererRef.current = new window.google.maps.DirectionsRenderer();
